@@ -16,6 +16,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
 import org.springframework.kafka.annotation.EnableKafkaStreams;
+import org.springframework.kafka.annotation.KafkaStreamsDefaultConfiguration;
 import org.springframework.kafka.config.KafkaStreamsConfiguration;
 import org.springframework.kafka.support.serializer.JsonDeserializer;
 import org.springframework.kafka.support.serializer.JsonSerializer;
@@ -33,7 +34,7 @@ public class KafkaConfig {
 
     private final static String BOOTSTRAP_SERVER = "localhost:9092";
 
-    @Bean
+    @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
     public KafkaStreamsConfiguration streamsConfiguration() {
 
         log.info("Populate properties for streams configuration");
@@ -57,11 +58,14 @@ public class KafkaConfig {
     public KStream<String, User> kStream(StreamsBuilder builder) {
 
         log.info("Creating streams for input and output data");
-        
-        KStream<String, String> stream = builder.stream("src", Consumed.with(Serdes.String(), Serdes.String()));
 
-        KStream<String, User> usersStream = stream.mapValues(this::getUSerFromStream)
-                .filter((k, v) -> v.getBalance() <= 0);
+        KStream<String, String> stream = builder
+                .stream("src1", Consumed.with(Serdes.String(), Serdes.String()));
+        log.info("Src stream: {}", stream.toString());
+
+        KStream<String, User> usersStream = stream
+                .mapValues(this::getUserFromString)
+                .filter((key, value) -> value.getBalance() <= 0);
         usersStream.to("out", Produced.with(Serdes.String(), userSerde()));
 
         return usersStream;
@@ -73,7 +77,7 @@ public class KafkaConfig {
         return new ObjectMapper();
     }
 
-    private User getUSerFromStream(String userString) {
+    private User getUserFromString(String userString) {
         User user = null;
 
         try {
