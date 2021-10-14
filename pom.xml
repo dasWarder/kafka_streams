@@ -47,6 +47,24 @@
         </dependency>
     </dependencies>
 
+    <profiles>
+        <profile>
+            <id>simple</id>
+            <activation>
+                <activeByDefault>true</activeByDefault>
+            </activation>
+            <properties>
+                <spring.profiles.active>simple</spring.profiles.active>
+            </properties>
+        </profile>
+        <profile>
+            <id>medium</id>
+            <properties>
+                <spring.profiles.active>medium</spring.profiles.active>
+            </properties>
+        </profile>
+    </profiles>
+
     <build>
         <plugins>
             <plugin>
