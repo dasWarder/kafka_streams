@@ -11,25 +11,26 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class OrderMapper {
 
-    private final ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper;
 
-    public StockInfo orderToStockInfo(Order order) {
+  public StockInfo orderToStockInfo(Order order) {
 
-        StockInfo info = StockInfo.builder()
-                .id(order.getId())
-                .name(order.getName())
-                .quantity(order.getQuantity())
-                .build();
+    StockInfo info =
+        StockInfo.builder()
+            .id(order.getId())
+            .name(order.getName())
+            .quantity(order.getQuantity())
+            .build();
 
-        return info;
+    return info;
+  }
+
+  public <T> String objectToString(T object) {
+
+    try {
+      return objectMapper.writeValueAsString(object);
+    } catch (JsonProcessingException e) {
+      throw new RuntimeException(e.getMessage());
     }
-
-    public <T> String objectToString(T object) {
-
-        try {
-            return objectMapper.writeValueAsString(object);
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e.getMessage());
-        }
-    }
+  }
 }

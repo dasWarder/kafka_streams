@@ -23,43 +23,38 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @Profile(value = "simple")
 public class KafkaConfig {
 
-    private final ObjectMapper objectMapper;
+  private final ObjectMapper objectMapper;
 
-    @Bean
-    public Serde<User> userSerde() {
-        return Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>(User.class));
+  @Bean
+  public Serde<User> userSerde() {
+    return Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>(User.class));
+  }
+
+  @Bean
+  public KStream<String, User> kStream(StreamsBuilder builder) {
+
+    log.info("Creating streams for input and output data");
+
+    KStream<String, String> stream =
+        builder.stream("src1", Consumed.with(Serdes.String(), Serdes.String()));
+
+    KStream<String, User> usersStream =
+        stream.mapValues(this::getUserFromString).filter((key, value) -> value.getBalance() <= 0);
+    usersStream.to("out", Produced.with(Serdes.String(), userSerde()));
+
+    return usersStream;
+  }
+
+  private User getUserFromString(String userString) {
+
+    User user = null;
+
+    try {
+      user = objectMapper.readValue(userString, User.class);
+    } catch (JsonProcessingException e) {
+      e.printStackTrace();
     }
 
-    @Bean
-    public KStream<String, User> kStream(StreamsBuilder builder) {
-
-        log.info("Creating streams for input and output data");
-
-        KStream<String, String> stream = builder
-                .stream("src1", Consumed.with(Serdes.String(), Serdes.String()));
-
-        KStream<String, User> usersStream = stream
-                .mapValues(this::getUserFromString)
-                .filter((key, value) -> value.getBalance() <= 0);
-        usersStream.to("out", Produced.with(Serdes.String(), userSerde()));
-
-        return usersStream;
-    }
-
-    private User getUserFromString(String userString) {
-
-        User user = null;
-
-        try {
-            user = objectMapper.readValue(userString, User.class);
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-        }
-
-        return user;
-    }
-
-
-
-
+    return user;
+  }
 }

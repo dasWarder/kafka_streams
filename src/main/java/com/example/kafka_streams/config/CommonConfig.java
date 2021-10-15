@@ -16,29 +16,28 @@ import java.util.Map;
 
 import static org.apache.kafka.streams.StreamsConfig.*;
 
-
 @EnableKafka
 @Configuration
 @EnableKafkaStreams
 public class CommonConfig {
 
-    final static String BOOTSTRAP_SERVER = "localhost:9092";
+  static final String BOOTSTRAP_SERVER = "localhost:9092";
 
-    @Bean
-    public ObjectMapper objectMapper() {
-        return new ObjectMapper();
-    }
+  @Bean
+  public ObjectMapper objectMapper() {
+    return new ObjectMapper();
+  }
 
-    @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
-    public KafkaStreamsConfiguration streamsConfiguration() {
+  @Bean(name = KafkaStreamsDefaultConfiguration.DEFAULT_STREAMS_CONFIG_BEAN_NAME)
+  public KafkaStreamsConfiguration streamsConfiguration() {
 
-        Map<String, Object> props = new HashMap<>();
+    Map<String, Object> props = new HashMap<>();
 
-        props.put(APPLICATION_ID_CONFIG, "id");
-        props.put(BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVER);
-        props.put(DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
-        props.put(DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    props.put(APPLICATION_ID_CONFIG, "id");
+    props.put(BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVER);
+    props.put(DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
+    props.put(DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
 
-        return new KafkaStreamsConfiguration(props);
-    }
+    return new KafkaStreamsConfiguration(props);
+  }
 }

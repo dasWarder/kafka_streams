@@ -10,9 +10,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class User {
 
-    @JsonProperty("phone_number")
-    private Long phoneNumber;
+  @JsonProperty("phone_number")
+  private Long phoneNumber;
 
-    @JsonProperty("balance")
-    private Double balance;
+  @JsonProperty("balance")
+  private Double balance;
 }

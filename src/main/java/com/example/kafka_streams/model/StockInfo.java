@@ -11,9 +11,9 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class StockInfo {
 
-    private Long id;
+  private Long id;
 
-    private String name;
+  private String name;
 
-    private Integer quantity;
+  private Integer quantity;
 }
