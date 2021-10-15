@@ -1,6 +1,8 @@
 package com.example.kafka_streams.config;
 
+import com.example.kafka_streams.map.OrderMapper;
 import com.example.kafka_streams.model.Order;
+import com.example.kafka_streams.model.StockInfo;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -23,11 +25,18 @@ import org.springframework.kafka.support.serializer.JsonSerializer;
 @Profile(value = "medium")
 public class MediumKafkaConfig {
 
+    private final OrderMapper orderMapper;
+
     private final ObjectMapper objectMapper;
 
     @Bean
     public Serde<Order> orderSerde() {
         return Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>(Order.class));
+    }
+
+    @Bean
+    public Serde<StockInfo> stockInfoSerde() {
+        return Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>(StockInfo.class));
     }
 
     @Bean
@@ -40,11 +49,10 @@ public class MediumKafkaConfig {
                 .filter((k, v) -> v.getPrice() < 1000);
         orders.to("basket", Produced.with(Serdes.String(), orderSerde()));
 
-        KStream<String, String> count = stream.mapValues(this::getOrderFromString)
-                .mapValues(v -> v.getQuantity())
-                .filter((k, v) -> v >= 2)
-                .mapValues(v -> v.toString());
-        count.to("stock", Produced.with(Serdes.String(), Serdes.String()));
+        KStream<String, StockInfo> stock = stream
+                .mapValues(this::getOrderFromString)
+                .mapValues(orderMapper::orderToStockInfo);
+        stock.to("stock", Produced.with(Serdes.String(), stockInfoSerde()));
 
         return orders;
     }
