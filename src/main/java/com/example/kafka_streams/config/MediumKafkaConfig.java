@@ -29,30 +29,23 @@ public class MediumKafkaConfig {
 
     private final ObjectMapper objectMapper;
 
-    @Bean
-    public Serde<Order> orderSerde() {
-        return Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>(Order.class));
-    }
 
     @Bean
-    public Serde<StockInfo> stockInfoSerde() {
-        return Serdes.serdeFrom(new JsonSerializer<>(), new JsonDeserializer<>(StockInfo.class));
-    }
+    public KStream<String, String> kStream(StreamsBuilder builder) {
 
-    @Bean
-    public KStream<String, Order> kStream(StreamsBuilder builder) {
+        KStream<String, String> stream = builder.stream("ordering", Consumed.with(Serdes.String(), Serdes.String()));
 
-        KStream<String, String> stream = builder.stream("orders", Consumed.with(Serdes.String(), Serdes.String()));
-
-        KStream<String, Order> orders = stream.mapValues(this::getOrderFromString)
+        KStream<String, String> orders = stream.mapValues(this::getOrderFromString)
                 .filter((k, v) -> v.getType().equals("book"))
-                .filter((k, v) -> v.getPrice() < 1000);
-        orders.to("basket", Produced.with(Serdes.String(), orderSerde()));
+                .filter((k, v) -> v.getPrice() < 1000)
+                .mapValues(orderMapper::objectToString);
+        orders.to("basket", Produced.with(Serdes.String(), Serdes.String()));
 
-        KStream<String, StockInfo> stock = stream
+        KStream<String, String> stock = stream
                 .mapValues(this::getOrderFromString)
-                .mapValues(orderMapper::orderToStockInfo);
-        stock.to("stock", Produced.with(Serdes.String(), stockInfoSerde()));
+                .mapValues(orderMapper::orderToStockInfo)
+                .mapValues(orderMapper::objectToString);
+        stock.to("stock", Produced.with(Serdes.String(), Serdes.String()));
 
         return orders;
     }
