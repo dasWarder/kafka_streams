@@ -1,6 +1,17 @@
 spring:
     profiles:
         active: @spring.profiles.active@
+    application:
+        name: stream-ws
+eureka:
+  client:
+      service-url:
+          defaultZone: http://localhost:8888/eureka
+  instance:
+      instance-id: ${spring.application.name}:${spring.application.instance_id:${random.value}}
 
 kafka:
     bootstrap_server: 127.0.0.1:9093
+
+server:
+    port: ${PORT:0}
