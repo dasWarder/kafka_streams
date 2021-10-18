@@ -4,6 +4,7 @@ import com.example.kafka_streams.model.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.common.serialization.Serdes;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.kafka.annotation.EnableKafka;
@@ -21,7 +22,8 @@ import static org.apache.kafka.streams.StreamsConfig.*;
 @EnableKafkaStreams
 public class CommonConfig {
 
-  static final String BOOTSTRAP_SERVER = "localhost:9092";
+  @Value("${kafka.bootstrap_server}")
+  String BOOTSTRAP_SERVER;
 
   @Bean
   public ObjectMapper objectMapper() {
